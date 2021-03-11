@@ -80,12 +80,18 @@ namespace CoronaDeployments
             services.AddSingleton<IRepositoryImportStrategy, SvnRepositoryStrategy>();
             services.AddSingleton<IRepositoryImportStrategy, GitRepositoryStrategy>();
 
+            // Add AppConfiguration
             var appConfig = Configuration["AppConfiguration:BaseDirctory"];
             services.AddSingleton(new AppConfiguration(appConfig));
 
-            var username = Configuration["AuthInfo:Username"];
-            var password = Configuration["AuthInfo:Password"];
-            services.AddSingleton<IRepositoryAuthenticationInfo>(new AuthInfo(username, password));
+            // Add Credentials
+            var gitUsername = Configuration["GitAuthInfo:Username"];
+            var gitPassword = Configuration["GitAuthInfo:Password"];
+            services.AddSingleton<IRepositoryAuthenticationInfo>(new AuthInfo(gitUsername, gitPassword, SourceCodeRepositoryType.Git));
+
+            var svnUsername = Configuration["SvnAuthInfo:Username"];
+            var svnPassword = Configuration["SvnAuthInfo:Password"];
+            services.AddSingleton<IRepositoryAuthenticationInfo>(new AuthInfo(svnUsername, svnPassword, SourceCodeRepositoryType.Svn));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

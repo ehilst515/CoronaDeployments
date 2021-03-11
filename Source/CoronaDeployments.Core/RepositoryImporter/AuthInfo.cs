@@ -2,8 +2,25 @@
 
 namespace CoronaDeployments.Core.RepositoryImporter
 {
-    public sealed record AuthInfo(string Username, string Password) : IRepositoryAuthenticationInfo
+    public sealed class AuthInfo : IRepositoryAuthenticationInfo
     {
+        public AuthInfo()
+        {
+        }
+
+        public AuthInfo(string username, string password, SourceCodeRepositoryType type)
+        {
+            Username = username;
+            Password = password;
+            Type = type;
+        }
+
+        public string Username { get; set; }
+
+        public string Password { get; set; }
+
+        public SourceCodeRepositoryType Type { get; set; }
+
         public async Task<bool> Validate()
         {
             if (string.IsNullOrWhiteSpace(Username)) return false;

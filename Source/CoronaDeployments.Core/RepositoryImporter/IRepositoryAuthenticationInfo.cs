@@ -5,5 +5,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
     public interface IRepositoryAuthenticationInfo
     {
         Task<bool> Validate();
+
+        SourceCodeRepositoryType Type { get; set; }
     }
 }

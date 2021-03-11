@@ -16,5 +16,23 @@ namespace CoronaDeployments.Core.RepositoryImporter
 
     public record RepositoryImportResult(string CheckOutDirectory, bool HasErrors);
 
-    public record RepositoryCommit(string CommitId, string CommitComment, DateTime CommitStamp, string CommitExtra);
+    public class RepositoryCommit
+    {
+        public RepositoryCommit()
+        {
+        }
+
+        public RepositoryCommit(string commitId, string commitComment, DateTime commitStamp, string commitExtra)
+        {
+            this.CommitId = commitId;
+            this.CommitComment = commitComment;
+            this.CommitStamp = commitStamp;
+            this.CommitExtra = commitExtra;
+        }
+
+        public string CommitId { get; set; } 
+        public string CommitComment { get; set; } 
+        public DateTime CommitStamp { get; set; }
+        public string CommitExtra { get; set; }
+    }
 }

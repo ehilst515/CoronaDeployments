@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -170,11 +171,21 @@ namespace CoronaDeployments.Controllers
         public async Task<IActionResult> CreateRepositoryCursor([FromQuery] Guid projectId,
             [FromServices] IEnumerable<IRepositoryImportStrategy> strategies,
             [FromServices] AppConfiguration appConfig,
-            [FromServices] IRepositoryAuthenticationInfo authInfo)
+            [FromServices] IEnumerable<IRepositoryAuthenticationInfo> authInfos)
         {
             var project = await projectRepo.Get(projectId);
             if (project == null)
             {
+                Log.Error($"Could not find project with id {projectId}");
+
+                return BadRequest();
+            }
+
+            var authInfo = authInfos.FirstOrDefault(x => x.Type == project.RepositoryType);
+            if (authInfo == null)
+            {
+                Log.Error("Could not find suitable credentials");
+
                 return BadRequest();
             }
 
