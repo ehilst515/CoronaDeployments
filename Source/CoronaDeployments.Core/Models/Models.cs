@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace CoronaDeployments.Core.Models
+{
+    public class BuildTarget
+    {
+        public Guid Id { get; set; }
+        public Guid ProjectId { get; set; }
+        public string Name { get; set; }
+        public string TargetRelativePath { get; set; }
+        public BuildTargetType Type { get; set; }
+        public DeployTargetType DeploymentType { get; set; }
+        public IDeployTargetExtraInfo DeploymentExtraInfo { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+    }
+
+    public class Project 
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string RepositoryUrl { get; set; }
+        public string BranchName { get; set; }
+        public SourceCodeRepositoryType RepositoryType { get; set; }
+        public IReadOnlyList<BuildTarget> BuildTargets { get; set; } = new List<BuildTarget>(0);
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid CreatedByUserId { get; set; }
+    }
+
+    public class RepositoryCursor
+    {
+        public Guid Id { get; set; }
+        public Guid ProjectId { get; set; }
+        public string CommitId { get; set; }
+        public string CommitComment { get; set; }
+        public DateTime CommitCreatedAt { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid CreatedByUserId { get; set; }
+    }
+
+    internal interface IProjectOperation
+    {
+        public Guid Id { get; }
+        public DateTime CreatedAtUtc { get; }
+        public Guid ProjectId { get; }
+
+        public Task Execute(Project project);
+        public DateTime? GetCompletedAtUtc();
+    }
+
+    public class Build : IProjectOperation
+    {
+        public Guid Id { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid ProjectId { get; set; }
+        public BuildResult Result { get; private set; }
+        public DateTime? CompletedAtUtc { get; private set; }
+
+        public async Task Execute(Project project)
+        {
+        }
+
+        public DateTime? GetCompletedAtUtc()
+        {
+            return this.CompletedAtUtc;
+        }
+    }
+
+    public class Deployment : IProjectOperation
+    {
+        public Guid Id { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid ProjectId { get; set; }
+        public DeployResult Result { get; private set; }
+        public DateTime? CompletedAtUtc { get; private set; }
+
+        public async Task Execute(Project project)
+        {
+        }
+
+        public DateTime? GetCompletedAtUtc()
+        {
+            return this.CompletedAtUtc;
+        }
+    }
+
+    public class ProjectOperationJob
+    {
+        public Guid Id { get; set; }
+        public Guid ProjectId { get; set; }
+        public string Instance { get; set; }
+        public ProjectOperationType OperationType { get; set; }
+    }
+
+    public enum ProjectOperationType
+    {
+        Build = 1,
+        Deploy = 2
+    }
+
+    public enum ProjectOperationStatus
+    {
+        Requested = 1,
+        Running = 2,
+        Failed = 3,
+        Success = 4
+    }
+
+    public class User
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Username { get; set; }
+        public string PasswordHashed { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+    }
+
+    public sealed class Session
+    {
+        public User User { get; set; }
+    }
+}
