@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoronaDeployments.Core.RepositoryImporter;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace CoronaDeployments.Core.Models.Mvc
     {
         public Guid ProjectId { get; set; }
         public string ProjectName { get; set; }
-        public string CommitId { get; set; }
-        public string CommitMessage { get; set; }
+        public RepositoryCommit Selected { get; set; }
+        public List<RepositoryCommit> Commits { get; set; }
     }
 }

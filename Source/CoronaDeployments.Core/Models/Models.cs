@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoronaDeployments.Core.RepositoryImporter;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,11 +33,9 @@ namespace CoronaDeployments.Core.Models
     {
         public Guid Id { get; set; }
         public Guid ProjectId { get; set; }
-        public string CommitId { get; set; }
-        public string CommitComment { get; set; }
-        public DateTime CommitCreatedAt { get; set; }
         public DateTime CreatedAtUtc { get; set; }
         public Guid CreatedByUserId { get; set; }
+        public RepositoryCommit Info { get; set; }
     }
 
     internal interface IProjectOperation

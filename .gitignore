@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 StartingDemo/TestFashion/Settings.cs
 Source/CoronaDeployments.Test/Password.cs
+Source/CoronaDeployments/appsettings.Development.json

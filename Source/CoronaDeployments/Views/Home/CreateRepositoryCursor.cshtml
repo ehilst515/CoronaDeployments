@@ -4,5 +4,47 @@
     ViewData["Title"] = "Create Repository Cursor";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>@ViewData["Title"] - (@Model.ProjectName)</h1>
 
+@if (Model.Commits != null)
+{ 
+<form asp-action="CreateRepositoryCursor" method="post">
+    @Html.HiddenFor(x => x.ProjectId)
+    @Html.HiddenFor(x => x.Selected.CommitStamp)
+    @Html.HiddenFor(x => x.Selected.CommitComment)
+    @Html.HiddenFor(x => x.Selected.CommitExtra)
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Commit Id</th>
+                <th>Commit Comment</th>
+                <th>Commit Created At</th>
+                <th>Commit Extra</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.Commits.OrderByDescending(x => x.CommitStamp))
+            {
+                <tr>
+                    <td>
+                        <input type="radio" asp-for="Selected.CommitId" value="@item.CommitId" />
+                    </td>
+
+                    <td>
+                        @item.CommitId
+                    </td>
+
+                    <td>@item.CommitComment</td>
+
+                    <td>@item.CommitStamp</td>
+
+                    <td>@item.CommitExtra</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+}

@@ -41,6 +41,8 @@
 
                     <td>
                         <a asp-controller="Home" asp-action="CreateBuildTarget" asp-route-projectId="@item.Id" class="btn btn-info">Add Build Target</a>
+
+                        <a asp-controller="Home" asp-action="CreateRepositoryCursor" asp-route-projectId="@item.Id" class="btn btn-info">Add Repository Cursor</a>
                     </td>
                 </tr>
             }

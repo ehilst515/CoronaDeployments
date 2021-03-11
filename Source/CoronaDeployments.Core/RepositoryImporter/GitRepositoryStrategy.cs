@@ -62,7 +62,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
             return Task.Run(() =>
             {
                 // Try to get the auth data.
-                var info = authInfo as GitAuthInfo;
+                var info = authInfo as AuthInfo;
                 if (info == null)
                 {
                     return new RepositoryImportResult(string.Empty, true);

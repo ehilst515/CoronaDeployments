@@ -18,6 +18,8 @@ namespace CoronaDeployments.Core.Repositories
         public Task<IReadOnlyList<Project>> GetAll();
         
         public Task<Project> Get(Guid id);
+
+        public Task<bool> CreateRepositoryCursor(RepositoryCursorCreateModel model);
     }
 
     public class ProjectRepository : IProjectRepository
@@ -121,6 +123,28 @@ namespace CoronaDeployments.Core.Repositories
             }
         }
 
+        public async Task<bool> CreateRepositoryCursor(RepositoryCursorCreateModel model)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var e = ToEntity(model);
+
+                    session.Store(e);
+
+                    await session.SaveChangesAsync();
+
+                    return true;
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return false;
+                }
+            }
+        }
+
         public Project ToEntity(ProjectCreateModel m)
         {
             return new Project
@@ -143,6 +167,16 @@ namespace CoronaDeployments.Core.Repositories
                 TargetRelativePath = m.TargetRelativePath,
                 ProjectId = m.ProjectId,
                 CreatedAtUtc = DateTime.UtcNow
+            };
+        }
+
+        public RepositoryCursor ToEntity(RepositoryCursorCreateModel m)
+        {
+            return new RepositoryCursor
+            {
+                ProjectId = m.ProjectId,
+                CreatedAtUtc = DateTime.UtcNow,
+                Info = m.Selected,
             };
         }
     }

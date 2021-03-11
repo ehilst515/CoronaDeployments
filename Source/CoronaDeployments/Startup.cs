@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CoronaDeployments.Core;
 using CoronaDeployments.Core.HostedServices;
 using CoronaDeployments.Core.Repositories;
+using CoronaDeployments.Core.RepositoryImporter;
 using Marten;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -74,6 +76,16 @@ namespace CoronaDeployments
             services.AddSingleton<IProjectRepository, ProjectRepository>();
             services.AddSingleton<IUserRepository, UserRepository>();
             services.AddSingleton<ISecurityRepository, SecurityRepository>();
+
+            services.AddSingleton<IRepositoryImportStrategy, SvnRepositoryStrategy>();
+            services.AddSingleton<IRepositoryImportStrategy, GitRepositoryStrategy>();
+
+            var appConfig = Configuration["AppConfiguration:BaseDirctory"];
+            services.AddSingleton(new AppConfiguration(appConfig));
+
+            var username = Configuration["AuthInfo:Username"];
+            var password = Configuration["AuthInfo:Password"];
+            services.AddSingleton<IRepositoryAuthenticationInfo>(new AuthInfo(username, password));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

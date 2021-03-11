@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace CoronaDeployments.Core
+namespace CoronaDeployments.Core.RepositoryImporter
 {
-    public sealed record SvnAuthInfo(string Username, string Password) : IRepositoryAuthenticationInfo
+    public sealed record AuthInfo(string Username, string Password) : IRepositoryAuthenticationInfo
     {
         public async Task<bool> Validate()
         {

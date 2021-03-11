@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoronaDeployments.Core
+namespace CoronaDeployments.Core.RepositoryImporter
 {
     public interface IRepositoryImportStrategy
     {

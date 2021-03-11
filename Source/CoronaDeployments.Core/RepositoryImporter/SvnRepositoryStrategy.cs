@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace CoronaDeployments.Core
+namespace CoronaDeployments.Core.RepositoryImporter
 {
     public record BuildResult(BuildTarget Target, string OutputPath, bool HasErrors);
 
@@ -21,7 +21,7 @@ namespace CoronaDeployments.Core
         {
             return Task.Run(async () =>
             {
-                var info = authInfo as SvnAuthInfo;
+                var info = authInfo as AuthInfo;
                 if (info == null)
                 {
                     return null;
@@ -76,7 +76,7 @@ namespace CoronaDeployments.Core
                 var folderName = $"{project.Name}_{DateTime.UtcNow.Ticks}";
                 var path = Path.Combine(appConfiguration.BaseDirectory, folderName);
 
-                var info = authInfo as SvnAuthInfo;
+                var info = authInfo as AuthInfo;
                 if (info == null)
                 {
                     return new RepositoryImportResult(string.Empty, true);

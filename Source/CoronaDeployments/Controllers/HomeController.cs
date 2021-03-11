@@ -1,19 +1,19 @@
-﻿using System;
+﻿using CoronaDeployments.Core;
+using CoronaDeployments.Core.Models.Mvc;
+using CoronaDeployments.Core.Repositories;
+using CoronaDeployments.Core.RepositoryImporter;
+using CoronaDeployments.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using CoronaDeployments.Models;
-using CoronaDeployments.Core.Repositories;
-using CoronaDeployments.Core.Models;
-using CoronaDeployments.Core.Models.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using CoronaDeployments;
+using System.Threading.Tasks;
 
 namespace CoronaDeployments.Controllers
 {
@@ -78,7 +78,7 @@ namespace CoronaDeployments.Controllers
         public async Task<IActionResult> Index()
         {
             var result = await projectRepo.GetAll();
-            
+
             return View(result);
         }
 
@@ -167,7 +167,10 @@ namespace CoronaDeployments.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CreateRepositoryCursor([FromQuery] Guid projectId)
+        public async Task<IActionResult> CreateRepositoryCursor([FromQuery] Guid projectId,
+            [FromServices] IEnumerable<IRepositoryImportStrategy> strategies,
+            [FromServices] AppConfiguration appConfig,
+            [FromServices] IRepositoryAuthenticationInfo authInfo)
         {
             var project = await projectRepo.Get(projectId);
             if (project == null)
@@ -175,13 +178,40 @@ namespace CoronaDeployments.Controllers
                 return BadRequest();
             }
 
+            var commits = await RepositoryManager.GetCommitList(project, project.RepositoryType,
+                appConfig,
+                authInfo,
+                new ReadOnlyCollection<IRepositoryImportStrategy>(strategies.ToList()),
+                10);
+
             var m = new RepositoryCursorCreateModel
             {
                 ProjectId = projectId,
-                ProjectName = project.Name
+                ProjectName = project.Name,
+                Commits = commits
             };
 
             return View(m);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateRepositoryCursor([FromForm] RepositoryCursorCreateModel m)
+        {
+            //if (ModelState.IsValid == false)
+            //{
+            //    return View(model);
+            //}
+
+            var result = await projectRepo.CreateRepositoryCursor(m);
+            if (result == false)
+            {
+                this.AlertError("Could not persist this object.");
+
+                return View(m);
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
