@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using CoronaDeployments.Core.Runner;
 
 namespace CoronaDeployments.Core.HostedServices
 {
@@ -14,6 +15,8 @@ namespace CoronaDeployments.Core.HostedServices
         private readonly TimeSpan _periodicInterval;
         private readonly IServiceProvider _services;
 
+        private readonly BackgroundRunner _runner;
+
         public CoreHostedService(IBackgroundTaskQueue taskQueue, IServiceProvider services)
         {
             _taskQueue = taskQueue;
@@ -21,6 +24,8 @@ namespace CoronaDeployments.Core.HostedServices
             _periodicInterval = TimeSpan.FromSeconds(2);
 
             _services = services;
+
+            _runner = new BackgroundRunner("Project X", new BuildAction(), null);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -28,6 +33,8 @@ namespace CoronaDeployments.Core.HostedServices
             Log.Information($"{nameof(CoreHostedService)} is running.");
 
             _timer = new Timer(DoWork, null, TimeSpan.Zero, _periodicInterval);
+
+            _runner.Start();
 
             return Task.CompletedTask;
         }
@@ -41,7 +48,7 @@ namespace CoronaDeployments.Core.HostedServices
             {
                 try
                 {
-                    Log.Information($"{nameof(CoreHostedService)}: Doing some work...");
+                    //Log.Information($"{nameof(CoreHostedService)}: Doing some work...");
 
                     //var workItem = await _taskQueue.DequeueAsync(CancellationToken.None);
                 }
@@ -58,6 +65,8 @@ namespace CoronaDeployments.Core.HostedServices
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Log.Information($"{nameof(CoreHostedService)} is stopping.");
+
+            _runner.Stop();
 
             return Task.CompletedTask;
         }

@@ -7,6 +7,10 @@ namespace CoronaDeployments.Core.Runner
 {
     public sealed class BuildAction : IRunnerAction
     {
+        public BuildAction()
+        {
+        }
+
         public StringBuilder Log { get; private set; }
         public bool HasErrors { get; private set; }
 
