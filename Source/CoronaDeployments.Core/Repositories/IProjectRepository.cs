@@ -20,6 +20,8 @@ namespace CoronaDeployments.Core.Repositories
         public Task<Project> Get(Guid id);
 
         public Task<bool> CreateRepositoryCursor(RepositoryCursorCreateModel model);
+
+        public Task<(bool, Guid)> CreateBuildAndDeployRequest(Guid projectId, Guid cursorId, Guid userId);
     }
 
     public class ProjectRepository : IProjectRepository
@@ -82,6 +84,7 @@ namespace CoronaDeployments.Core.Repositories
                 try
                 {
                     var projects = await session.Query<Project>()
+                        .OrderBy(x => x.CreatedAtUtc)
                         .ToListAsync();
 
                     // Batch in BuildTargets.
@@ -89,9 +92,16 @@ namespace CoronaDeployments.Core.Repositories
                     {
                         var buildTargets = await session.Query<BuildTarget>()
                             .Where(x => x.ProjectId == p.Id)
+                            .OrderBy(x => x.CreatedAtUtc)
+                            .ToListAsync();
+
+                        var cursors = await session.Query<RepositoryCursor>()
+                            .Where(x => x.ProjectId == p.Id)
+                            .OrderByDescending(x => x.CreatedAtUtc)
                             .ToListAsync();
 
                         p.BuildTargets = buildTargets;
+                        p.Cursors = cursors;
                     }
 
                     return projects;
@@ -145,6 +155,35 @@ namespace CoronaDeployments.Core.Repositories
             }
         }
 
+        public async Task<(bool, Guid)> CreateBuildAndDeployRequest(Guid projectId, Guid cursorId, Guid userId)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var e = new BuildAndDeployRequest
+                    {
+                        CreatedAtUtc = DateTime.UtcNow,
+                        CreatedByUserId = userId,
+                        ProjectId = projectId,
+                        CursorId = cursorId,
+                        State = BuildAndDeployRequestState.Created
+                    };
+
+                    session.Store(e);
+
+                    await session.SaveChangesAsync();
+
+                    return (true, e.Id);
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return (false, Guid.Empty);
+                }
+            }
+        }
+
         public Project ToEntity(ProjectCreateModel m)
         {
             return new Project
@@ -177,6 +216,7 @@ namespace CoronaDeployments.Core.Repositories
                 ProjectId = m.ProjectId,
                 CreatedAtUtc = DateTime.UtcNow,
                 Info = m.Selected,
+                Name = m.Name,
             };
         }
     }

@@ -27,15 +27,36 @@ namespace CoronaDeployments.Core.Models
         public IReadOnlyList<BuildTarget> BuildTargets { get; set; } = new List<BuildTarget>(0);
         public DateTime CreatedAtUtc { get; set; }
         public Guid CreatedByUserId { get; set; }
+        public IReadOnlyList<RepositoryCursor> Cursors { get; set; } = new List<RepositoryCursor>(0);
     }
 
     public class RepositoryCursor
     {
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public Guid ProjectId { get; set; }
         public DateTime CreatedAtUtc { get; set; }
         public Guid CreatedByUserId { get; set; }
         public RepositoryCommit Info { get; set; }
+    }
+
+    public class BuildAndDeployRequest
+    {
+        public Guid Id { get; set; }
+        public Guid ProjectId { get; set; }
+        public Guid CursorId { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public Guid CreatedByUserId { get; set; }
+        public BuildAndDeployRequestState State { get; set; }
+        public DateTime? StartedAtUtc { get; set; }
+        public DateTime? CompletedAtUtc { get; set; }
+        public string Log { get; set; }
+    }
+
+    public enum BuildAndDeployRequestState
+    {
+        Created = 1,
+        Completed = 2
     }
 
     internal interface IProjectOperation

@@ -28,6 +28,12 @@
         @Html.HiddenFor(x => x.Selected.CommitComment)
         @Html.HiddenFor(x => x.Selected.CommitExtra)
 
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input class="form-control" asp-for="Name" />
+            <span asp-validation-for="Name"></span>
+        </div>
+
         <table class="table table-bordered">
             <thead>
                 <tr>

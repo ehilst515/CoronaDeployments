@@ -50,6 +50,12 @@ namespace CoronaDeployments
             self.TempData[SysMsg] = message;
             self.TempData[SysMsgClass] = "alert alert-info";
         }
+
+        public static void AlertSuccess(this Controller self, string message)
+        {
+            self.TempData[SysMsg] = message;
+            self.TempData[SysMsgClass] = "alert alert-success";
+        }
     }
 
     public static class SessionUtils

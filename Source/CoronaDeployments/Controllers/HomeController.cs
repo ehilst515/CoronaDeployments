@@ -26,7 +26,7 @@ namespace CoronaDeployments.Controllers
 
         public HomeController(IProjectRepository repo, IUserRepository userRepo)
         {
-            projectRepo = repo;
+            this.projectRepo = repo;
             this.userRepo = userRepo;
         }
 
@@ -222,6 +222,31 @@ namespace CoronaDeployments.Controllers
                 return View(m);
             }
 
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateBuildAndDeployRequest([FromForm] Guid projectId, [FromForm] Guid cursorId)
+        {
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
+            var (result, id) = await projectRepo.CreateBuildAndDeployRequest(projectId, cursorId, session.User.Id);
+            if (result)
+            {
+                // TODO: redirect to the build and Deploy page
+                this.AlertSuccess(
+                    $"A new Build & Deploy Request is created. <a href=\"/Home/BuildAndDeployRequest?id={id}\">Click Here to follow up.</a>");
+            }
+            else
+            {
+                this.AlertError("Failed to create Build & Deploy Request.");
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 

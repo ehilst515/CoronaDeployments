@@ -21,7 +21,7 @@ namespace CoronaDeployments.Test
                 RepositoryUrl = "https://github.com/SherifRefaat/CoronaDeployments.git",
                 BranchName = "main",
             };
-            var authInfo = new AuthInfo(Email.Value1, Password.Value1);
+            var authInfo = new AuthInfo(Email.Value1, Password.Value1, SourceCodeRepositoryType.Git);
 
             var config = new Core.AppConfiguration(@"C:\Repository\TestOldFashion");
 

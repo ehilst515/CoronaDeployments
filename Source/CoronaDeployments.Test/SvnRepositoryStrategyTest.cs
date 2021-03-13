@@ -20,7 +20,7 @@ namespace CoronaDeployments.Test
                 Name = "TestProject",
                 RepositoryUrl = "https://silverkey.repositoryhosting.com/svn/silverkey_silverkey_nrea",
             };
-            var authInfo = new AuthInfo(Email.Value2, Password.Value2);
+            var authInfo = new AuthInfo(Email.Value2, Password.Value2, SourceCodeRepositoryType.Svn);
 
             var config = new Core.AppConfiguration(@"C:\Repository\TestOldFashion");
 
