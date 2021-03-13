@@ -9,6 +9,7 @@ namespace CoronaDeployments.Core.Runner
     {
         public BuildAction()
         {
+            Log = new StringBuilder();
         }
 
         public StringBuilder Log { get; private set; }

@@ -5,50 +5,71 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using CoronaDeployments.Core.Runner;
+using CoronaDeployments.Core.Repositories;
+using System.Collections.Generic;
+using System.Linq;
+using CoronaDeployments.Core.Models;
 
 namespace CoronaDeployments.Core.HostedServices
 {
     public class CoreHostedService : IHostedService
     {
-        private Timer _timer;
-        private readonly IBackgroundTaskQueue _taskQueue;
-        private readonly TimeSpan _periodicInterval;
-        private readonly IServiceProvider _services;
+        private Timer timer;
+        private readonly IBackgroundTaskQueue taskQueue;
+        private readonly TimeSpan periodicInterval;
+        private readonly IServiceProvider services;
+        private readonly IProjectRepository projectRepo;
+        private readonly List<BackgroundRunner> runners;
 
-        private readonly BackgroundRunner _runner;
-
-        public CoreHostedService(IBackgroundTaskQueue taskQueue, IServiceProvider services)
+        public CoreHostedService(IBackgroundTaskQueue taskQueue, IServiceProvider services, IProjectRepository projectRepo)
         {
-            _taskQueue = taskQueue;
+            this.taskQueue = taskQueue;
 
-            _periodicInterval = TimeSpan.FromSeconds(2);
+            periodicInterval = TimeSpan.FromSeconds(5);
 
-            _services = services;
-
-            _runner = new BackgroundRunner("Project X", new BuildAction(), null);
+            this.services = services;
+            this.projectRepo = projectRepo;
+            this.runners = new List<BackgroundRunner>();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             Log.Information($"{nameof(CoreHostedService)} is running.");
 
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, _periodicInterval);
+            timer = new Timer(DoWork, null, 0, -1); // Start immediatly without periodic signaling.
 
-            _runner.Start();
+            await EnsureAllProjectsAreAllocated();
+        }
 
-            return Task.CompletedTask;
+        private async Task EnsureAllProjectsAreAllocated()
+        {
+            var projects = await projectRepo.GetAll();
+            if (projects != null)
+            {
+                var notAllocatedProjects = new List<Project>(projects)
+                    .Where(x => this.runners.Any(y => y.Name == x.Name) == false)
+                    .ToList();
+                foreach (var p in notAllocatedProjects)
+                {
+                    Log.Information($"A new project is discovered named {p.Name}");
+
+                    var newRunner = new BackgroundRunner(p.Name, new BuildAction(), new BuildActionPayload { ProjectId = p.Id });
+                    this.runners.Add(newRunner);
+                    newRunner.Start();
+                }
+            }
         }
 
         private async void DoWork(object state)
         {
             // Disable timer.
-            _timer.Change(-1, -1);
+            timer.Change(-1, -1);
 
             // Inner loop.
             {
                 try
                 {
-                    //Log.Information($"{nameof(CoreHostedService)}: Doing some work...");
+                    await EnsureAllProjectsAreAllocated();
 
                     //var workItem = await _taskQueue.DequeueAsync(CancellationToken.None);
                 }
@@ -59,21 +80,21 @@ namespace CoronaDeployments.Core.HostedServices
             }
 
             // Re-enable the timer.
-            _timer.Change(_periodicInterval, _periodicInterval);
+            timer.Change((int)periodicInterval.TotalMilliseconds, -1);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             Log.Information($"{nameof(CoreHostedService)} is stopping.");
 
-            _runner.Stop();
+            runners.ForEach(x => x.Stop());
 
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
-            _timer?.Dispose();
+            timer?.Dispose();
         }
     }
 
