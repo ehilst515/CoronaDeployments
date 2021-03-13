@@ -16,12 +16,14 @@ namespace CoronaDeployments.Core.Repositories
         public Task<bool> CreateBuildTarget(BuildTargetCreateModel model);
 
         public Task<IReadOnlyList<Project>> GetAll();
-        
+
         public Task<Project> Get(Guid id);
 
         public Task<bool> CreateRepositoryCursor(RepositoryCursorCreateModel model);
 
         public Task<(bool, Guid)> CreateBuildAndDeployRequest(Guid projectId, Guid cursorId, Guid userId);
+
+        public Task<List<BuildAndDeployRequestModel>> GetBuildAndDeployRequests(Guid projectId, BuildAndDeployRequestState? state, bool includeProject = false);
     }
 
     public class ProjectRepository : IProjectRepository
@@ -180,6 +182,61 @@ namespace CoronaDeployments.Core.Repositories
                 {
                     Log.Error(exp, string.Empty);
                     return (false, Guid.Empty);
+                }
+            }
+        }
+
+        public async Task<List<BuildAndDeployRequestModel>> GetBuildAndDeployRequests(Guid projectId, BuildAndDeployRequestState? state, bool includeProject = false)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var query = session.Query<BuildAndDeployRequest>()
+                        .Where(x => x.ProjectId == projectId);
+
+                    if (state != null)
+                    {
+                        query = query.Where(x => x.State == state.Value);
+                    }
+
+                    var requests = await query.ToListAsync();
+
+                    if (requests.Count == 0)
+                    {
+                        return new List<BuildAndDeployRequestModel>(0);
+                    }
+
+                    Project project = null;
+
+                    if (includeProject)
+                    {
+                        project = await session.Query<Project>()
+                            .FirstOrDefaultAsync(x => x.Id == projectId);
+                    }
+
+                    var result = requests
+                        .Select(x => new BuildAndDeployRequestModel
+                        {
+                            Request = x,
+                            Project = project
+                        })
+                        .ToList();
+
+                    foreach (var r in result)
+                    {
+                        var cursor = await session.Query<RepositoryCursor>()
+                            .FirstOrDefaultAsync(x => x.Id == r.Request.CursorId);
+                        
+                        r.Cursor = cursor;
+                    }
+
+                    return result;
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return null;
                 }
             }
         }

@@ -54,6 +54,13 @@ namespace CoronaDeployments.Core.Models
         public string Log { get; set; }
     }
 
+    public class BuildAndDeployRequestModel
+    {
+        public BuildAndDeployRequest Request { get; set; }
+        public Project Project { get; set; }
+        public RepositoryCursor Cursor { get; set; }
+    }
+
     public enum BuildAndDeployRequestState
     {
         Created = 1,
