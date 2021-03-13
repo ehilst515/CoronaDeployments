@@ -15,6 +15,7 @@ namespace CoronaDeployments.Core.Models
         public DeployTargetType DeploymentType { get; set; }
         public IDeployTargetExtraInfo DeploymentExtraInfo { get; set; }
         public DateTime CreatedAtUtc { get; set; }
+        public Guid CreatedByUserId { get; set; }
     }
 
     public class Project 

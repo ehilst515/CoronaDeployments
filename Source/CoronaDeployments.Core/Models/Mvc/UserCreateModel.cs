@@ -9,6 +9,7 @@ namespace CoronaDeployments.Core.Models.Mvc
     {
         public string Name { get; set; }
         public string Username { get; set; }
+        public Guid CreatedByUserId { get; set; }
         private string Password { get; set; } = null;
 
         public string GetPassword()

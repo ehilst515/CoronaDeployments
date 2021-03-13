@@ -192,7 +192,8 @@ namespace CoronaDeployments.Core.Repositories
                 BranchName = m.BranchName,
                 RepositoryType = m.RepositoryType,
                 RepositoryUrl = m.RepositoryUrl,
-                CreatedAtUtc = DateTime.UtcNow
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByUserId = m.CreatedByUserId,
             };
         }
 
@@ -205,7 +206,8 @@ namespace CoronaDeployments.Core.Repositories
                 DeploymentType = m.DeploymentType,
                 TargetRelativePath = m.TargetRelativePath,
                 ProjectId = m.ProjectId,
-                CreatedAtUtc = DateTime.UtcNow
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByUserId = m.CreatedByUserId
             };
         }
 
@@ -217,6 +219,7 @@ namespace CoronaDeployments.Core.Repositories
                 CreatedAtUtc = DateTime.UtcNow,
                 Info = m.Selected,
                 Name = m.Name,
+                CreatedByUserId = m.CreatedByUserId,
             };
         }
     }

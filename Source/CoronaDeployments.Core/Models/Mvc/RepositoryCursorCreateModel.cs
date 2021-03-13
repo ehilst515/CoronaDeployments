@@ -12,5 +12,7 @@ namespace CoronaDeployments.Core.Models.Mvc
         public string ProjectName { get; set; }
         public RepositoryCommit Selected { get; set; }
         public List<RepositoryCommit> Commits { get; set; }
+        public Guid CreatedAtUtc { get; set; }
+        public Guid CreatedByUserId { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace CoronaDeployments.Core.Models.Mvc
         public string RepositoryUrl { get; set; }
         public string BranchName { get; set; }
         public SourceCodeRepositoryType RepositoryType { get; set; }
+        public Guid CreatedByUserId { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

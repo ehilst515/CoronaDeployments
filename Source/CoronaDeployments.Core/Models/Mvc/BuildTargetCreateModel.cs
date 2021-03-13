@@ -12,6 +12,7 @@ namespace CoronaDeployments.Core.Models.Mvc
         public BuildTargetType Type { get; set; }
         public DeployTargetType DeploymentType { get; set; }
         public Guid ProjectId { get; set; }
+        public Guid CreatedByUserId { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

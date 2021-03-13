@@ -98,6 +98,14 @@ namespace CoronaDeployments.Controllers
                 return View(model);
             }
 
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
+            model.CreatedByUserId = session.User.Id;
+
             var result = await projectRepo.Create(model);
             if (result == false)
             {
@@ -122,12 +130,22 @@ namespace CoronaDeployments.Controllers
         public async Task<IActionResult> CreateBuildTarget([FromForm] BuildTargetCreateModel model)
         {
             if (model.ProjectId == Guid.Empty)
+            { 
                 return BadRequest();
+            }
 
             if (ModelState.IsValid == false)
             {
                 return View(model);
             }
+
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
+            model.CreatedByUserId = session.User.Id;
 
             var result = await projectRepo.CreateBuildTarget(model);
             if (result == false)
@@ -154,6 +172,14 @@ namespace CoronaDeployments.Controllers
             {
                 return View(model);
             }
+
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
+            model.CreatedByUserId = session.User.Id;
 
             var result = await userRepo.Create(model);
             if (result == null)
@@ -209,10 +235,18 @@ namespace CoronaDeployments.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateRepositoryCursor([FromForm] RepositoryCursorCreateModel m)
         {
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
             //if (ModelState.IsValid == false)
             //{
             //    return View(model);
             //}
+
+            m.CreatedByUserId = session.User.Id;
 
             var result = await projectRepo.CreateRepositoryCursor(m);
             if (result == false)
