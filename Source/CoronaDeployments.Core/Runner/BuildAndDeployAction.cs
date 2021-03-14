@@ -120,7 +120,8 @@ namespace CoronaDeployments.Core.Runner
                     }
 
                     Logger.Information("Start deploying reposiotory...");
-                    DeployManager.DeployTargetsAsync(successfulBuilds.select)
+
+                    Logger.Information("End.");
                 }
             }
             catch (Exception exp)
