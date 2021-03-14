@@ -49,10 +49,12 @@ namespace CoronaDeployments.Core.Runner
                     {
                         var task = DoWork(r);
 
+                        await payload.ProjectRepository.UpdateBuildAndDeployRequest(r.Request.Id, Logger.ToString(), null, DateTime.UtcNow);
+                        
                         while (task.IsCompleted == false)
                         {
                             // Persist Log
-                            await payload.ProjectRepository.UpdateBuildAndDeployRequest(r.Request.Id, Logger.ToString(), null, DateTime.UtcNow);
+                            await payload.ProjectRepository.UpdateBuildAndDeployRequest(r.Request.Id, Logger.ToString(), null, null);
 
                             // Sleep for a while
                             await Task.Delay(TimeSpan.FromSeconds(5));
