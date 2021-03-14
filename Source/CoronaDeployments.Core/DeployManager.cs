@@ -1,5 +1,6 @@
 ﻿using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.RepositoryImporter;
+using CoronaDeployments.Core.Runner;
 using Serilog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,27 +11,27 @@ namespace CoronaDeployments.Core
 {
     public static class DeployManager
     {
-        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildTarget[] targets, IReadOnlyCollection<IDeployStrategy> strategies)
+        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildTarget[] targets, IReadOnlyCollection<IDeployStrategy> strategies, CustomLogger customLogger)
         {
             var result = new List<DeployResult>();
             foreach (var t in targets)
             {
-                Log.Information($"Deploying Target: {t.Type} {t.Name} {t.TargetRelativePath}");
+                customLogger.Information($"Deploying Target: {t.Type} {t.Name} {t.TargetRelativePath}");
 
                 DeployStrategyResult currentResult = default;
                 var strategy = strategies.FirstOrDefault(x => x.Type == t.DeploymentType);
 
                 if (strategy == null)
                 {
-                    Log.Error($"Unknown deploy target type: {t.Type}");
+                    customLogger.Error($"Unknown deploy target type: {t.Type}");
                     continue;
                 }
 
-                currentResult = await strategy.DeployAsync(t);
+                currentResult = await strategy.DeployAsync(t, customLogger);
 
-                Log.Information($"Output: IsError: {currentResult.IsError}");
-                Log.Information(currentResult.Output);
-                Log.Information(string.Empty);
+                customLogger.Information($"Output: IsError: {currentResult.IsError}");
+                customLogger.Information(currentResult.Output);
+                customLogger.Information(string.Empty);
 
                 result.Add(new DeployResult(t, currentResult.Output, currentResult.IsError));
             }

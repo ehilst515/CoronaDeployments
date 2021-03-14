@@ -21,7 +21,8 @@ namespace CoronaDeployments.Test
             var result = await s.ImportAsync(
                 p,
                 new Core.AppConfiguration(@"C:\Repository\TestOldFashion"), 
-                new AuthInfo(Email.Value1, Password.Value1, Core.SourceCodeRepositoryType.Git));
+                new AuthInfo(Email.Value1, Password.Value1, Core.SourceCodeRepositoryType.Git),
+                new Core.Runner.CustomLogger());
 
             Assert.False(result.HasErrors);
         }

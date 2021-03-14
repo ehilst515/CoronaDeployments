@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core.Models;
+using CoronaDeployments.Core.Runner;
 using LibGit2Sharp;
 using Serilog;
 using System;
@@ -13,11 +14,13 @@ namespace CoronaDeployments.Core.RepositoryImporter
     {
         public SourceCodeRepositoryType Type => SourceCodeRepositoryType.Git;
 
-        public Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, int count)
+        public Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo,
+            CustomLogger runnerLogger,
+            int count)
         {
             return Task.Run(async () =>
             {
-                var importResult = await ImportAsync(entity, appConfiguration, authInfo);
+                var importResult = await ImportAsync(entity, appConfiguration, authInfo, runnerLogger);
                 if (importResult.HasErrors)
                 {
                     return null;
@@ -42,14 +45,14 @@ namespace CoronaDeployments.Core.RepositoryImporter
                     }
                     catch (Exception exp)
                     {
-                        Log.Error(exp, string.Empty);
+                        runnerLogger.Error(exp);
                     }
 
                     return result;
                 }
                 catch (Exception exp)
                 {
-                    Log.Error(exp, string.Empty);
+                    runnerLogger.Error(exp);
 
                     return null;
                 }
@@ -57,7 +60,9 @@ namespace CoronaDeployments.Core.RepositoryImporter
         }
 
         public Task<RepositoryImportResult> ImportAsync(Project project, AppConfiguration appConfiguration,
-            IRepositoryAuthenticationInfo authInfo, string commitId = null)
+            IRepositoryAuthenticationInfo authInfo,
+            CustomLogger runnerLogger,
+            string commitId = null)
         {
             return Task.Run(() =>
             {
@@ -103,7 +108,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
                             new RepositoryImportResult(string.Empty, true);
                         }
 
-                        Log.Information("Checking out...");
+                        runnerLogger.Information("Checking out...");
 
                         Branch currentBranch;
 
@@ -112,7 +117,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
                             var localCommit = repo.Lookup<Commit>(new ObjectId(commitId));
                             if (localCommit == null)
                             {
-                                Log.Error("Could not find branch.");
+                                runnerLogger.Error("Could not find branch.");
                                 return new RepositoryImportResult(null, true);
                             }
 
@@ -123,7 +128,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
                             currentBranch = Commands.Checkout(repo, branch);
                         }
 
-                        Log.Information($"Check out complete. Result = {currentBranch != null}");
+                        runnerLogger.Information($"Check out complete. Result = {currentBranch != null}");
 
                         if (currentBranch != null)
                         {
@@ -137,7 +142,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
                 }
                 catch (Exception exp)
                 {
-                    Log.Error(exp, string.Empty);
+                    runnerLogger.Error(exp);
 
                     return new RepositoryImportResult(string.Empty, true);
                 }

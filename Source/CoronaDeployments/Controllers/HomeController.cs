@@ -219,6 +219,7 @@ namespace CoronaDeployments.Controllers
                 appConfig,
                 authInfo,
                 new ReadOnlyCollection<IRepositoryImportStrategy>(strategies.ToList()),
+                new Core.Runner.CustomLogger(),
                 10);
 
             var m = new RepositoryCursorCreateModel

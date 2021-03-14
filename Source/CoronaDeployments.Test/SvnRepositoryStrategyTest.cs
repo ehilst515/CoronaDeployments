@@ -24,7 +24,7 @@ namespace CoronaDeployments.Test
 
             var config = new Core.AppConfiguration(@"C:\Repository\TestOldFashion");
 
-            var result = await s.GetLastCommitsAsync(p, config, authInfo, 10);
+            var result = await s.GetLastCommitsAsync(p, config, authInfo, new Core.Runner.CustomLogger(), 10);
 
             Assert.NotNull(result);
             Assert.NotEmpty(result);

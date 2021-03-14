@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core.Models;
+using CoronaDeployments.Core.Runner;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
     {
         public SourceCodeRepositoryType Type => SourceCodeRepositoryType.Svn;
 
-        public Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, int count)
+        public Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, CustomLogger runnerLogger, int count)
         {
             return Task.Run(async () =>
             {
@@ -29,7 +30,7 @@ namespace CoronaDeployments.Core.RepositoryImporter
 
                 try
                 {
-                    var checkoutResult = await ImportAsync(entity, appConfiguration, authInfo);
+                    var checkoutResult = await ImportAsync(entity, appConfiguration, authInfo, runnerLogger);
                     if (checkoutResult.HasErrors)
                     {
                         return null;
@@ -55,25 +56,25 @@ namespace CoronaDeployments.Core.RepositoryImporter
                     }
                     catch (Exception exp)
                     {
-                        Log.Error(exp, string.Empty);
+                        runnerLogger.Error(exp);
                     }
 
                     return result;
                 }
                 catch (Exception exp)
                 {
-                    Log.Error(exp, string.Empty);
+                    runnerLogger.Error(exp);
 
                     return null;
                 }
             });
         }
 
-        public Task<RepositoryImportResult> ImportAsync(Project project, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, string commitId = null)
+        public Task<RepositoryImportResult> ImportAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, CustomLogger runnerLogger, string commitId = null)
         {
             return Task.Run(() =>
             {
-                var folderName = $"{project.Name}_{DateTime.UtcNow.Ticks}";
+                var folderName = $"{entity.Name}_{DateTime.UtcNow.Ticks}";
                 var path = Path.Combine(appConfiguration.BaseDirectory, folderName);
 
                 var info = authInfo as AuthInfo;
@@ -90,28 +91,28 @@ namespace CoronaDeployments.Core.RepositoryImporter
                     {
                         client.Authentication.DefaultCredentials = new NetworkCredential(info.Username, info.Password);
 
-                        Log.Information("Checking out...");
+                        runnerLogger.Information("Checking out...");
 
                         bool result = false;
                         
                         if (commitId == null)
-                            result = client.CheckOut(new SharpSvn.SvnUriTarget(project.RepositoryUrl), path);
+                            result = client.CheckOut(new SharpSvn.SvnUriTarget(entity.RepositoryUrl), path);
                         else
-                            result = client.CheckOut(new SharpSvn.SvnUriTarget(project.RepositoryUrl), path, new SharpSvn.SvnCheckOutArgs
+                            result = client.CheckOut(new SharpSvn.SvnUriTarget(entity.RepositoryUrl), path, new SharpSvn.SvnCheckOutArgs
                             {
                                 Revision = new SharpSvn.SvnRevision(int.Parse(commitId))
                             });
 
-                        Log.Information($"Check out complete. Result = {result}");
+                        runnerLogger.Information($"Check out complete. Result = {result}");
                     }
 
-                    Log.Information(string.Empty);
+                    runnerLogger.Information(string.Empty);
 
                     return new RepositoryImportResult(path, false);
                 }
                 catch (Exception exp)
                 {
-                    Log.Error(exp, string.Empty);
+                    runnerLogger.Error(exp);
 
                     return new RepositoryImportResult(string.Empty, true);
                 }

@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core.Models;
+using CoronaDeployments.Core.Runner;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,9 +10,9 @@ namespace CoronaDeployments.Core.RepositoryImporter
     {
         SourceCodeRepositoryType Type { get; }
 
-        Task<RepositoryImportResult> ImportAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, string commitId = null);
+        Task<RepositoryImportResult> ImportAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, CustomLogger runnerLogger, string commitId = null);
 
-        Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, int count);
+        Task<List<RepositoryCommit>> GetLastCommitsAsync(Project entity, AppConfiguration appConfiguration, IRepositoryAuthenticationInfo authInfo, CustomLogger runnerLogger, int count);
     }
 
     public record RepositoryImportResult(string CheckOutDirectory, bool HasErrors);

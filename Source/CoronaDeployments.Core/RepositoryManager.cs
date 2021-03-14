@@ -1,5 +1,6 @@
 ﻿using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.RepositoryImporter;
+using CoronaDeployments.Core.Runner;
 using Serilog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,13 +14,14 @@ namespace CoronaDeployments.Core
     {
         public static async Task<RepositoryImportResult> ImportAsync(Project project, SourceCodeRepositoryType repoType, AppConfiguration appConfiguration, 
             IRepositoryAuthenticationInfo authInfo,
-            ReadOnlyCollection<IRepositoryImportStrategy> strategies)
+            ReadOnlyCollection<IRepositoryImportStrategy> strategies,
+            CustomLogger runnerLogger)
         {
             if (authInfo != null)
             {
                 if (await authInfo.Validate() == false)
                 {
-                    Log.Information($"Validation for {nameof(authInfo)} did not pass.");
+                    runnerLogger.Information($"Validation for {nameof(authInfo)} did not pass.");
 
                     return new RepositoryImportResult(string.Empty, true);
                 }
@@ -29,11 +31,11 @@ namespace CoronaDeployments.Core
 
             if (strategy == null)
             {
-                Log.Error($"Unknown Source Code Import type: {repoType}");
+                runnerLogger.Error($"Unknown Source Code Import type: {repoType}");
                 return default;
             }
 
-            var result = await strategy.ImportAsync(project, appConfiguration, authInfo);
+            var result = await strategy.ImportAsync(project, appConfiguration, authInfo, runnerLogger);
 
             return result;
         }
@@ -41,13 +43,14 @@ namespace CoronaDeployments.Core
         public static async Task<List<RepositoryCommit>> GetCommitList(Project p, SourceCodeRepositoryType repoType, AppConfiguration appConfiguration, 
             IRepositoryAuthenticationInfo authInfo,
             ReadOnlyCollection<IRepositoryImportStrategy> strategies, 
+            CustomLogger runnerLogger,
             int count)
         {
             if (authInfo != null)
             {
                 if (await authInfo.Validate() == false)
                 {
-                    Log.Information($"Validation for {nameof(authInfo)} did not pass.");
+                    runnerLogger.Information($"Validation for {nameof(authInfo)} did not pass.");
 
                     return null;
                 }
@@ -57,11 +60,11 @@ namespace CoronaDeployments.Core
 
             if (strategy == null)
             {
-                Log.Error($"Unknown Source Code Import type: {repoType}");
+                runnerLogger.Error($"Unknown Source Code Import type: {repoType}");
                 return null;
             }
 
-            var result = await strategy.GetLastCommitsAsync(p, appConfiguration, authInfo, count);
+            var result = await strategy.GetLastCommitsAsync(p, appConfiguration, authInfo, runnerLogger, count);
 
             return result;
         }

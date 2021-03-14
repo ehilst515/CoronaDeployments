@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core.Models;
+using CoronaDeployments.Core.Runner;
 using Serilog;
 using System;
 using System.Linq;
@@ -10,15 +11,15 @@ namespace CoronaDeployments.Core
     {
         public BuildTargetType Type => BuildTargetType.DotNetCore;
 
-        public async Task<BuildStrategyResult> BuildAsync(BuildTarget target, string sourcePath, string outPath)
+        public async Task<BuildStrategyResult> BuildAsync(BuildTarget target, string sourcePath, string outPath, CustomLogger customLogger)
         {
             try
             {
                 var cmd = $"dotnet publish {sourcePath} -c Release --self-contained -r win-x64 -o {outPath}";
 
-                Log.Information(string.Empty);
-                Log.Information(cmd);
-                Log.Information(string.Empty);
+                customLogger.Information(string.Empty);
+                customLogger.Information(cmd);
+                customLogger.Information(string.Empty);
 
                 var output = await Shell.Execute(cmd);
 
@@ -28,7 +29,7 @@ namespace CoronaDeployments.Core
             }
             catch (Exception exp)
             {
-                Log.Error(exp, string.Empty);
+                customLogger.Error(exp);
                 return new BuildStrategyResult(string.Empty, true);
             }
         }
