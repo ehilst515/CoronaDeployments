@@ -53,7 +53,7 @@ namespace CoronaDeployments.Core.HostedServices
                 {
                     Log.Information($"A new project is discovered named {p.Name}");
 
-                    var newRunner = new BackgroundRunner(p.Name, new BuildAction(), new BuildActionPayload 
+                    var newRunner = new BackgroundRunner(p.Name, new BuildAndDeployAction(), new BuildAndDeployActionPayload 
                     { 
                         ProjectId = p.Id,
                         ProjectRepository = projectRepo,
