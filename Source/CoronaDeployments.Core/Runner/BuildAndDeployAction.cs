@@ -1,8 +1,10 @@
 ﻿using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.Repositories;
+using CoronaDeployments.Core.RepositoryImporter;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CoronaDeployments.Core.Runner
@@ -76,10 +78,50 @@ namespace CoronaDeployments.Core.Runner
         {
             try
             {
-                Logger.Information("Doing work 0..."); await Task.Delay(5_000);
-                Logger.Information("Doing work 1..."); await Task.Delay(5_000);
-                Logger.Information("Doing work 2..."); await Task.Delay(5_000);
-                Logger.Information("Doing work 3..."); await Task.Delay(5_000);
+                using (var scope = Payload.ServiceProvider.CreateScope())
+                {
+                    Logger.Information("Start fetching reposiotory...");
+
+                    var config = scope.ServiceProvider.GetRequiredService<AppConfiguration>();
+                    var authConfigs = scope.ServiceProvider.GetServices<IRepositoryAuthenticationInfo>();
+                    var importStrategies = scope.ServiceProvider.GetServices<IRepositoryImportStrategy>();
+
+                    var importResult = await RepositoryManager.ImportAsync(request.Project, request.Project.RepositoryType, 
+                        config, 
+                        authConfigs.First(x => x.Type == request.Project.RepositoryType),
+                        new ReadOnlyCollection<IRepositoryImportStrategy>(importStrategies.ToList()), 
+                        Logger);
+                    if (importResult.HasErrors)
+                    {
+                        Logger.Error($"Importing repository did not complete successfully.");
+                        return;
+                    }
+
+                    Logger.Information($"Project directory: {importResult.CheckOutDirectory}");
+
+
+                    Logger.Information("Start building reposiotory...");
+                    if (request.Project.BuildTargets == null || request.Project.BuildTargets.Count == 0)
+                    {
+                        Logger.Error("Project doesn't contain BuildTargets.");
+                        return;
+                    }
+
+                    var buildStrategies = scope.ServiceProvider.GetServices<ISourceCodeBuilderStrategy>();
+                    var buildResult = await SourceCodeBuilder.BuildTargetsAsync(importResult.CheckOutDirectory,
+                        request.Project.BuildTargets.ToArray(),
+                        new ReadOnlyCollection<ISourceCodeBuilderStrategy>(buildStrategies.ToList()),
+                        Logger);
+
+                    var successfulBuilds = buildResult.Where(x => x.HasErrors == false).ToArray();
+                    if (successfulBuilds.Length != buildResult.Count)
+                    {
+                        Logger.Error("Not all BuildTargets where build successfully.");
+                    }
+
+                    Logger.Information("Start deploying reposiotory...");
+                    DeployManager.DeployTargetsAsync(successfulBuilds.select)
+                }
             }
             catch (Exception exp)
             {
