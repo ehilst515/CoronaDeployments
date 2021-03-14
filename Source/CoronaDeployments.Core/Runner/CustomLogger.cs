@@ -16,19 +16,19 @@ namespace CoronaDeployments.Core.Runner
 
         public void Error(string m)
         {
-            log.AppendFormat($"{DateTime.UtcNow}: Error: {{0}}<br />", m);
+            log.AppendFormat($"<p class=\"text-danger\">{DateTime.UtcNow}: Error: {{0}}</p>", m);
             Log.Error(m);
         }
 
         public void Error(Exception e)
         {
-            log.AppendFormat($"{DateTime.UtcNow}: Error: {{0}}<br />", e);
+            log.AppendFormat($"<p class=\"text-danger\">{DateTime.UtcNow}: Error: {{0}}</p>", e);
             Log.Error(e, string.Empty);
         }
 
         public void Information(string m)
         {
-            log.AppendFormat($"{DateTime.UtcNow}: Info: {{0}}<br />", m);
+            log.AppendFormat($"<p class=\"text-info\">{DateTime.UtcNow}: Info: {{0}}</p>", m);
             Log.Information(m);
         }
 

@@ -29,10 +29,19 @@ namespace CoronaDeployments.Core
 
                 currentResult = await strategy.DeployAsync(t, customLogger);
 
-                customLogger.Information($"Output: IsError: {currentResult.IsError}");
-                customLogger.Information(currentResult.Output);
-                customLogger.Information(string.Empty);
+                if (currentResult.IsError)
+                {
+                    customLogger.Error($"Output: IsError: {currentResult.IsError}");
+                    customLogger.Error(currentResult.Output);
+                }
+                else
+                {
+                    customLogger.Information($"Output: IsError: {currentResult.IsError}");
+                    customLogger.Information(currentResult.Output);
+                }
 
+                customLogger.Information(string.Empty);
+                
                 result.Add(new DeployResult(t, currentResult.Output, currentResult.IsError));
             }
 

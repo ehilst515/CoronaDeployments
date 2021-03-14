@@ -217,6 +217,10 @@ namespace CoronaDeployments.Core.Repositories
                     {
                         project = await session.Query<Project>()
                             .FirstOrDefaultAsync(x => x.Id == projectId);
+
+                        project.BuildTargets = await session.Query<BuildTarget>()
+                            .Where(x => x.ProjectId == projectId)
+                            .ToListAsync();
                     }
 
                     var result = requests

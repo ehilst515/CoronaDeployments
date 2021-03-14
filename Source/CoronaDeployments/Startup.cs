@@ -80,6 +80,8 @@ namespace CoronaDeployments
             services.AddSingleton<IRepositoryImportStrategy, SvnRepositoryStrategy>();
             services.AddSingleton<IRepositoryImportStrategy, GitRepositoryStrategy>();
 
+            services.AddSingleton<ISourceCodeBuilderStrategy, DotNetCoreSourceBuilderStrategy>();
+
             // Add AppConfiguration
             var appConfig = Configuration["AppConfiguration:BaseDirctory"];
             services.AddSingleton(new AppConfiguration(appConfig));

@@ -119,7 +119,7 @@ namespace CoronaDeployments.Core.Runner
                         Logger.Error("Not all BuildTargets where build successfully.");
                     }
 
-                    Logger.Information("Start deploying reposiotory...");
+                    //Logger.Information("Start deploying reposiotory...");
 
                     Logger.Information("End.");
                 }

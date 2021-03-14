@@ -1,7 +1,6 @@
 ﻿using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.RepositoryImporter;
 using CoronaDeployments.Core.Runner;
-using Serilog;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -12,7 +11,7 @@ namespace CoronaDeployments.Core
 {
     public static class SourceCodeBuilder
     {
-        public static async Task<ReadOnlyCollection<BuildResult>> BuildTargetsAsync(string checkOutDirectory, BuildTarget[] targets, 
+        public static async Task<ReadOnlyCollection<BuildResult>> BuildTargetsAsync(string checkOutDirectory, BuildTarget[] targets,
             ReadOnlyCollection<ISourceCodeBuilderStrategy> strategies,
             CustomLogger customLogger)
         {
@@ -35,8 +34,17 @@ namespace CoronaDeployments.Core
 
                 currentResult = await strategy.BuildAsync(t, sourcePath, outPath, customLogger);
 
-                customLogger.Information($"Output: IsError: {currentResult.IsError}");
-                customLogger.Information(currentResult.Output);
+                if (currentResult.IsError)
+                {
+                    customLogger.Error($"Output: IsError: {currentResult.IsError}");
+                    customLogger.Error(currentResult.Output);
+                }
+                else
+                {
+                    customLogger.Information($"Output: IsError: {currentResult.IsError}");
+                    customLogger.Information(currentResult.Output);
+                }
+
                 customLogger.Information(string.Empty);
 
                 result.Add(new BuildResult(t, outPath, currentResult.IsError));
