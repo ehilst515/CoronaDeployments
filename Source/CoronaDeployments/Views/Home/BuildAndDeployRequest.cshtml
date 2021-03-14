@@ -6,20 +6,49 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<br />
+<div class="row col-12">
 
-Project: @Model.Project.Name
+    <br />
 
-<br />
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">Project</th>
+            </tr>
+            <tr>
+                <td colspan="2">@Model.Project.Name</td>
+            </tr>
 
-Cursor: @Model.Cursor.Name - @Model.Cursor.Info.CommitId  - @Model.Cursor.Info.CommitComment - @Model.Cursor.Info.CommitExtra - @Model.Cursor.Info.CommitStamp
+            <tr>
+                <th colspan="2">Cursor</th>
+            </tr>
 
-<br />
+            <tr>
+                <td colspan="2">
+                    @Model.Cursor.Name - @Model.Cursor.Info.CommitId  - @Model.Cursor.Info.CommitComment - @Model.Cursor.Info.CommitExtra - @Model.Cursor.Info.CommitStamp
+                </td>
+            </tr>
+        </thead>
 
-Request Current State: @Model.Request.State
-Request Started At: @Model.Request.StartedAtUtc
-Request Completed At: @Model.Request.CompletedAtUtc
+        <tbody>
+            <tr>
+                <td class="font-weight-bold">Request Current State</td>
+                <td>@Model.Request.State</td>
+            </tr>
 
-<br />
+            <tr>
+                <td class="font-weight-bold">Request Started At</td>
+                <td>@Model.Request.StartedAtUtc</td>
+            </tr>
 
-@Html.Raw(Model.Request.Log)
+            <tr>
+                <td class="font-weight-bold">Request Completed At</td>
+                <td>@Model.Request.CompletedAtUtc</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br />
+
+    @Html.Raw(Model.Request.Log ?? string.Empty)
+</div>

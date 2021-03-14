@@ -89,17 +89,17 @@ namespace CoronaDeployments.Core.Runner
 
         private void LogError(string m)
         {
-            Log.AppendLine($"{DateTime.UtcNow}: Error: {m}");
+            Log.AppendFormat($"{DateTime.UtcNow}: Error: {{0}}<br />", m);
         }
 
         private void LogError(Exception e)
         {
-            Log.AppendLine($"{DateTime.UtcNow}: Error: {e}");
+            Log.AppendFormat($"{DateTime.UtcNow}: Error: {{0}}<br />", e);
         }
 
         private void LogInfo(string m)
         {
-            Log.AppendLine($"{DateTime.UtcNow}: Info: {m}");
+            Log.AppendFormat($"{DateTime.UtcNow}: Info: {{0}}<br />", m);
         }
     }
 
