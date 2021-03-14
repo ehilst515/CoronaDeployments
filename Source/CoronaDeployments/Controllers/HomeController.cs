@@ -130,7 +130,7 @@ namespace CoronaDeployments.Controllers
         public async Task<IActionResult> CreateBuildTarget([FromForm] BuildTargetCreateModel model)
         {
             if (model.ProjectId == Guid.Empty)
-            { 
+            {
                 return BadRequest();
             }
 
@@ -272,16 +272,26 @@ namespace CoronaDeployments.Controllers
             var (result, id) = await projectRepo.CreateBuildAndDeployRequest(projectId, cursorId, session.User.Id);
             if (result)
             {
-                // TODO: redirect to the build and Deploy page
-                this.AlertSuccess(
-                    $"A new Build & Deploy Request is created. <a href=\"/Home/BuildAndDeployRequest?id={id}\">Click Here to follow up.</a>");
+                return RedirectToAction(nameof(BuildAndDeployRequest), new { requestId = id });
             }
             else
             {
                 this.AlertError("Failed to create Build & Deploy Request.");
+                return RedirectToAction(nameof(Index));
             }
-            
-            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> BuildAndDeployRequest([FromQuery] Guid requestId)
+        {
+            var r = await projectRepo.GetBuildAndDeployRequest(requestId);
+            if (r == null)
+            {
+                this.AlertError("Could not find record.");
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(r);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

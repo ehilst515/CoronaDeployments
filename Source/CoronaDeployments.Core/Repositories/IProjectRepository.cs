@@ -23,7 +23,11 @@ namespace CoronaDeployments.Core.Repositories
 
         public Task<(bool, Guid)> CreateBuildAndDeployRequest(Guid projectId, Guid cursorId, Guid userId);
 
+        public Task<BuildAndDeployRequestModel> GetBuildAndDeployRequest(Guid id);
+
         public Task<List<BuildAndDeployRequestModel>> GetBuildAndDeployRequests(Guid projectId, BuildAndDeployRequestState? state, bool includeProject = false);
+
+        public Task UpdateBuildAndDeployRequest(Guid id, string log, BuildAndDeployRequestState? newState, DateTime? startedAt);
     }
 
     public class ProjectRepository : IProjectRepository
@@ -227,7 +231,7 @@ namespace CoronaDeployments.Core.Repositories
                     {
                         var cursor = await session.Query<RepositoryCursor>()
                             .FirstOrDefaultAsync(x => x.Id == r.Request.CursorId);
-                        
+
                         r.Cursor = cursor;
                     }
 
@@ -237,6 +241,81 @@ namespace CoronaDeployments.Core.Repositories
                 {
                     Log.Error(exp, string.Empty);
                     return null;
+                }
+            }
+        }
+
+        public async Task<BuildAndDeployRequestModel> GetBuildAndDeployRequest(Guid id)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var r = await session.Query<BuildAndDeployRequest>()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
+                    if (r == null)
+                    {
+                        return null;
+                    }
+
+                    var project = await session.Query<Project>()
+                        .FirstOrDefaultAsync(x => x.Id == r.ProjectId);
+
+                    var cursor = await session.Query<RepositoryCursor>()
+                        .FirstOrDefaultAsync(x => x.Id == r.CursorId);
+
+                    return new BuildAndDeployRequestModel
+                    {
+                        Request = r,
+                        Project = project,
+                        Cursor = cursor,
+                    };
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return null;
+                }
+            }
+        }
+
+        public async Task UpdateBuildAndDeployRequest(Guid id, string log, BuildAndDeployRequestState? newState, DateTime? startedAt)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var r = await session.Query<BuildAndDeployRequest>()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
+                    if (string.IsNullOrEmpty(log) == false)
+                    {
+                        r.Log = log;
+                    }
+
+                    if (startedAt.HasValue)
+                    {
+                        r.StartedAtUtc = startedAt;
+                    }
+
+                    if (newState.HasValue)
+                    {
+                        r.State = newState.Value;
+
+                        if (newState == BuildAndDeployRequestState.Completed)
+                        {
+                            r.CompletedAtUtc = DateTime.UtcNow;
+                        }
+                    }
+
+                    session.Update(r);
+
+                    await session.SaveChangesAsync();
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
                 }
             }
         }

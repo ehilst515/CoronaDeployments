@@ -25,7 +25,7 @@ namespace CoronaDeployments.Core.HostedServices
         {
             this.taskQueue = taskQueue;
 
-            periodicInterval = TimeSpan.FromSeconds(5);
+            this.periodicInterval = TimeSpan.FromSeconds(5);
 
             this.services = services;
             this.projectRepo = projectRepo;
@@ -53,7 +53,13 @@ namespace CoronaDeployments.Core.HostedServices
                 {
                     Log.Information($"A new project is discovered named {p.Name}");
 
-                    var newRunner = new BackgroundRunner(p.Name, new BuildAction(), new BuildActionPayload { ProjectId = p.Id });
+                    var newRunner = new BackgroundRunner(p.Name, new BuildAction(), new BuildActionPayload 
+                    { 
+                        ProjectId = p.Id,
+                        ProjectRepository = projectRepo,
+                        ServiceProvider = services,
+                    });
+
                     this.runners.Add(newRunner);
                     newRunner.Start();
                 }

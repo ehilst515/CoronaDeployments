@@ -1,0 +1,25 @@
+﻿@model BuildAndDeployRequestModel
+
+@{
+    ViewData["Title"] = "Build And Deploy Request";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<br />
+
+Project: @Model.Project.Name
+
+<br />
+
+Cursor: @Model.Cursor.Name - @Model.Cursor.Info.CommitId  - @Model.Cursor.Info.CommitComment - @Model.Cursor.Info.CommitExtra - @Model.Cursor.Info.CommitStamp
+
+<br />
+
+Request Current State: @Model.Request.State
+Request Started At: @Model.Request.StartedAtUtc
+Request Completed At: @Model.Request.CompletedAtUtc
+
+<br />
+
+@Html.Raw(Model.Request.Log)

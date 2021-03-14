@@ -64,7 +64,7 @@ namespace CoronaDeployments.Core.Models
     public enum BuildAndDeployRequestState
     {
         Created = 1,
-        Completed = 2
+        Completed = 2,
     }
 
     internal interface IProjectOperation
