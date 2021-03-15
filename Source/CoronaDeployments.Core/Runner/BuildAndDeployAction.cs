@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core.Build;
+using CoronaDeployments.Core.Deploy;
 using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.Repositories;
 using CoronaDeployments.Core.RepositoryImporter;
@@ -111,18 +112,28 @@ namespace CoronaDeployments.Core.Runner
                     }
 
                     var buildStrategies = scope.ServiceProvider.GetServices<ISourceCodeBuilderStrategy>();
-                    var buildResult = await SourceCodeBuilder.BuildTargetsAsync(importResult.CheckOutDirectory,
+                    var buildResults = await SourceCodeBuilder.BuildTargetsAsync(importResult.CheckOutDirectory,
                         request.Project.BuildTargets.ToArray(),
                         new ReadOnlyCollection<ISourceCodeBuilderStrategy>(buildStrategies.ToList()),
                         Logger);
 
-                    var successfulBuilds = buildResult.Where(x => x.HasErrors == false).ToArray();
-                    if (successfulBuilds.Length != buildResult.Count)
+                    if (buildResults.Any(x => x.HasErrors))
                     {
-                        Logger.Error("Not all BuildTargets where build successfully.");
+                        Logger.Error("Not all BuildTargets where build successfully. Skipping deployment.");
+                        Logger.Information("End.");
+
+                        return;
                     }
 
-                    //Logger.Information("Start deploying reposiotory...");
+                    Logger.Information("Start deploying reposiotory...");
+                    var deployStrategies = scope.ServiceProvider.GetServices<IDeployStrategy>();
+                    var deployResult = await DeployManager.DeployTargetsAsync(buildResults.ToArray(),
+                        new ReadOnlyCollection<IDeployStrategy>(deployStrategies.ToList()),
+                        Logger);
+                    if (deployResult.Any(x => x.HasErrors))
+                    {
+                        Logger.Error("Not all deployments ran successfully.");
+                    }
 
                     Logger.Information("End.");
                 }

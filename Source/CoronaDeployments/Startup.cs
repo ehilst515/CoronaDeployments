@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoronaDeployments.Core;
 using CoronaDeployments.Core.Build;
+using CoronaDeployments.Core.Deploy;
 using CoronaDeployments.Core.HostedServices;
 using CoronaDeployments.Core.Repositories;
 using CoronaDeployments.Core.RepositoryImporter;
@@ -82,6 +83,8 @@ namespace CoronaDeployments
             services.AddSingleton<IRepositoryImportStrategy, GitRepositoryStrategy>();
 
             services.AddSingleton<ISourceCodeBuilderStrategy, DotNetCoreSourceBuilderStrategy>();
+
+            services.AddSingleton<IDeployStrategy, InternetInformationServerDeploymentStrategy>();
 
             // Add AppConfiguration
             var appConfig = Configuration["AppConfiguration:BaseDirctory"];

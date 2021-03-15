@@ -12,7 +12,8 @@ namespace CoronaDeployments.Core
 {
     public static class DeployManager
     {
-        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildResult[] targets, IReadOnlyCollection<IDeployStrategy> strategies, CustomLogger customLogger)
+        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildResult[] targets, IReadOnlyCollection<IDeployStrategy> strategies, 
+            CustomLogger customLogger)
         {
             var result = new List<DeployResult>();
             foreach (var t in targets)
