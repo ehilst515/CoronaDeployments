@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CoronaDeployments.Core;
+using CoronaDeployments.Core.Build;
 using CoronaDeployments.Core.HostedServices;
 using CoronaDeployments.Core.Repositories;
 using CoronaDeployments.Core.RepositoryImporter;

@@ -1,4 +1,4 @@
-﻿namespace CoronaDeployments.Core
+﻿namespace CoronaDeployments.Core.Build
 {
     public enum SourceCodeRepositoryType
     {

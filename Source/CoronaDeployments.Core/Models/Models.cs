@@ -1,4 +1,6 @@
-﻿using CoronaDeployments.Core.RepositoryImporter;
+﻿using CoronaDeployments.Core.Build;
+using CoronaDeployments.Core.Deploy;
+using CoronaDeployments.Core.RepositoryImporter;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -66,6 +68,10 @@ namespace CoronaDeployments.Core.Models
         Created = 1,
         Completed = 2,
     }
+
+    public record BuildResult(BuildTarget Target, string OutputPath, bool HasErrors);
+
+    public record DeployResult(BuildResult Target, string Output, bool HasErrors);
 
     internal interface IProjectOperation
     {

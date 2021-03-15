@@ -1,4 +1,5 @@
-﻿using CoronaDeployments.Core.Models;
+﻿using CoronaDeployments.Core.Build;
+using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.Runner;
 using Serilog;
 using System;
@@ -10,10 +11,6 @@ using System.Threading.Tasks;
 
 namespace CoronaDeployments.Core.RepositoryImporter
 {
-    public record BuildResult(BuildTarget Target, string OutputPath, bool HasErrors);
-
-    public record DeployResult(BuildTarget Target, string Output, bool HasErrors);
-
     public sealed class SvnRepositoryStrategy : IRepositoryImportStrategy
     {
         public SourceCodeRepositoryType Type => SourceCodeRepositoryType.Svn;

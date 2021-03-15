@@ -1,4 +1,5 @@
 ﻿using CoronaDeployments.Core;
+using CoronaDeployments.Core.Build;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

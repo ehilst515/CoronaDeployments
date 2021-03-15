@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CoronaDeployments.Core
+namespace CoronaDeployments.Core.Build
 {
     public sealed class DotNetCoreSourceBuilderStrategy : ISourceCodeBuilderStrategy
     {

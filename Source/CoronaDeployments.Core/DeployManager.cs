@@ -1,4 +1,5 @@
-﻿using CoronaDeployments.Core.Models;
+﻿using CoronaDeployments.Core.Deploy;
+using CoronaDeployments.Core.Models;
 using CoronaDeployments.Core.RepositoryImporter;
 using CoronaDeployments.Core.Runner;
 using Serilog;
@@ -11,19 +12,19 @@ namespace CoronaDeployments.Core
 {
     public static class DeployManager
     {
-        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildTarget[] targets, IReadOnlyCollection<IDeployStrategy> strategies, CustomLogger customLogger)
+        public static async Task<ReadOnlyCollection<DeployResult>> DeployTargetsAsync(BuildResult[] targets, IReadOnlyCollection<IDeployStrategy> strategies, CustomLogger customLogger)
         {
             var result = new List<DeployResult>();
             foreach (var t in targets)
             {
-                customLogger.Information($"Deploying Target: {t.Type} {t.Name} {t.TargetRelativePath}");
+                customLogger.Information($"Deploying Target: {t.Target.Type} {t.Target.Name} {t.Target.TargetRelativePath}");
 
                 DeployStrategyResult currentResult = default;
-                var strategy = strategies.FirstOrDefault(x => x.Type == t.DeploymentType);
+                var strategy = strategies.FirstOrDefault(x => x.Type == t.Target.DeploymentType);
 
                 if (strategy == null)
                 {
-                    customLogger.Error($"Unknown deploy target type: {t.Type}");
+                    customLogger.Error($"Unknown deploy target type: {t.Target.Type}");
                     continue;
                 }
 

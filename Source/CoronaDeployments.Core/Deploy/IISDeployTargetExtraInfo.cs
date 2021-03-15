@@ -1,4 +1,4 @@
-﻿namespace CoronaDeployments.Core
+﻿namespace CoronaDeployments.Core.Deploy
 {
     public record IISDeployTargetExtraInfo(string SiteName, int Port) : IDeployTargetExtraInfo
     {

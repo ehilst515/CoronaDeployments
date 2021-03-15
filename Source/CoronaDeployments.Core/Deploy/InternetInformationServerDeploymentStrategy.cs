@@ -1,64 +1,69 @@
 ﻿using CoronaDeployments.Core.Models;
+using CoronaDeployments.Core.Runner;
 using Microsoft.Web.Administration;
 using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CoronaDeployments.Core
+namespace CoronaDeployments.Core.Deploy
 {
-    //public sealed class InternetInformationServerDeploymentStrategy : IDeployStrategy
-    //{
-    //    public DeployTargetType Type => DeployTargetType.IIS;
+    public sealed class InternetInformationServerDeploymentStrategy : IDeployStrategy
+    {
+        public DeployTargetType Type => DeployTargetType.IIS;
 
-    //    public async Task<DeployStrategyResult> DeployAsync(BuildTarget target)
-    //    {
-    //        var info = target.DeploymentExtraInfo as IISDeployTargetExtraInfo;
+        public async Task<DeployStrategyResult> DeployAsync(BuildResult buildResult, CustomLogger customLogger)
+        {
+            var info = buildResult.Target.DeploymentExtraInfo as IISDeployTargetExtraInfo;
 
-    //        if (IISDeployTargetExtraInfo.Validate(info) == false)
-    //        {
-    //            return new DeployStrategyResult(string.Empty, true);
-    //        }
+            if (IISDeployTargetExtraInfo.Validate(info) == false)
+            {
+                return new DeployStrategyResult(string.Empty, true);
+            }
 
-    //        return await Task.Run(() =>
-    //        {
-    //            try
-    //            {
-    //                using (var manager = new ServerManager())
-    //                {
-    //                    var currentSites = manager.Sites;
-    //                    foreach (var item in currentSites)
-    //                    {
-    //                        Log.Information(item.Name);
-    //                    }
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    using (var manager = new ServerManager())
+                    {
+                        customLogger.Information("Current sites installed:");
 
-    //                    // Find out if the site exists already.
-    //                    var site = manager.Sites.FirstOrDefault(x => x.Name == info.SiteName);
-    //                    if (site == null)
-    //                    {
-    //                        site = manager.Sites.Add(info.SiteName, target.Result.OutputPath, info.Port);
-    //                        manager.CommitChanges();
-    //                    }
-    //                    else
-    //                    {
-    //                        site.Stop();
+                        var currentSites = manager.Sites;
+                        foreach (var item in currentSites)
+                        {
+                            customLogger.Information(item.Name);
+                        }
 
-    //                        site.Applications["/"].VirtualDirectories["/"].PhysicalPath = target.Result.OutputPath;
+                        customLogger.Information(string.Empty);
 
-    //                        manager.CommitChanges();
+                        // Find out if the site exists already.
+                        var site = manager.Sites.FirstOrDefault(x => x.Name == info.SiteName);
+                        if (site == null)
+                        {
+                            site = manager.Sites.Add(info.SiteName, buildResult.OutputPath, info.Port);
+                            manager.CommitChanges();
+                        }
+                        else
+                        {
+                            site.Stop();
 
-    //                        site.Start();
-    //                    }
-    //                }
+                            site.Applications["/"].VirtualDirectories["/"].PhysicalPath = buildResult.OutputPath;
 
-    //                return new DeployStrategyResult(string.Empty, false);
-    //            }
-    //            catch (Exception exp)
-    //            {
-    //                Log.Error(exp, string.Empty);
-    //                return new DeployStrategyResult(string.Empty, true);
-    //            }
-    //        });
-    //    }
-    //}
+                            manager.CommitChanges();
+
+                            site.Start();
+                        }
+                    }
+
+                    return new DeployStrategyResult(string.Empty, false);
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return new DeployStrategyResult(string.Empty, true);
+                }
+            });
+        }
+    }
 }
