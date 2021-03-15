@@ -89,6 +89,8 @@ namespace CoronaDeployments.Core.Runner
                     var config = scope.ServiceProvider.GetRequiredService<AppConfiguration>();
                     var authConfigs = scope.ServiceProvider.GetServices<IRepositoryAuthenticationInfo>();
                     var importStrategies = scope.ServiceProvider.GetServices<IRepositoryImportStrategy>();
+                    var buildStrategies = scope.ServiceProvider.GetServices<ISourceCodeBuilderStrategy>();
+                    var deployStrategies = scope.ServiceProvider.GetServices<IDeployStrategy>();
 
                     var importResult = await RepositoryManager.ImportAsync(request.Project, request.Project.RepositoryType, 
                         config, 
@@ -111,7 +113,6 @@ namespace CoronaDeployments.Core.Runner
                         return;
                     }
 
-                    var buildStrategies = scope.ServiceProvider.GetServices<ISourceCodeBuilderStrategy>();
                     var buildResults = await SourceCodeBuilder.BuildTargetsAsync(importResult.CheckOutDirectory,
                         request.Project.BuildTargets.ToArray(),
                         new ReadOnlyCollection<ISourceCodeBuilderStrategy>(buildStrategies.ToList()),
@@ -126,7 +127,6 @@ namespace CoronaDeployments.Core.Runner
                     }
 
                     Logger.Information("Start deploying reposiotory...");
-                    var deployStrategies = scope.ServiceProvider.GetServices<IDeployStrategy>();
                     var deployResult = await DeployManager.DeployTargetsAsync(buildResults.ToArray(),
                         new ReadOnlyCollection<IDeployStrategy>(deployStrategies.ToList()),
                         Logger);
