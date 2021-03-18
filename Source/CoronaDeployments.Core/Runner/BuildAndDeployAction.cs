@@ -92,11 +92,12 @@ namespace CoronaDeployments.Core.Runner
                     var buildStrategies = scope.ServiceProvider.GetServices<ISourceCodeBuilderStrategy>();
                     var deployStrategies = scope.ServiceProvider.GetServices<IDeployStrategy>();
 
-                    var importResult = await RepositoryManager.ImportAsync(request.Project, request.Project.RepositoryType, 
+                    var importResult = await RepositoryManager.ImportAsync(request.Project,  
                         config, 
                         authConfigs.First(x => x.Type == request.Project.RepositoryType),
-                        new ReadOnlyCollection<IRepositoryImportStrategy>(importStrategies.ToList()), 
-                        Logger);
+                        new ReadOnlyCollection<IRepositoryImportStrategy>(importStrategies.ToList()),
+                        Logger,
+                        request.Cursor.Info.CommitId);
                     if (importResult.HasErrors)
                     {
                         Logger.Error($"Importing repository did not complete successfully.");

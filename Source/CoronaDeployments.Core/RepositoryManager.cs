@@ -13,10 +13,12 @@ namespace CoronaDeployments.Core
 {
     public static class RepositoryManager
     {
-        public static async Task<RepositoryImportResult> ImportAsync(Project project, SourceCodeRepositoryType repoType, AppConfiguration appConfiguration, 
+        public static async Task<RepositoryImportResult> ImportAsync(Project project, 
+            AppConfiguration appConfiguration, 
             IRepositoryAuthenticationInfo authInfo,
             ReadOnlyCollection<IRepositoryImportStrategy> strategies,
-            CustomLogger runnerLogger)
+            CustomLogger runnerLogger,
+            string commitId = null)
         {
             if (authInfo != null)
             {
@@ -28,15 +30,15 @@ namespace CoronaDeployments.Core
                 }
             }
 
-            var strategy = strategies.FirstOrDefault(x => x.Type == repoType);
+            var strategy = strategies.FirstOrDefault(x => x.Type == project.RepositoryType);
 
             if (strategy == null)
             {
-                runnerLogger.Error($"Unknown Source Code Import type: {repoType}");
+                runnerLogger.Error($"Unknown Source Code Import type: {project.RepositoryType}");
                 return default;
             }
 
-            var result = await strategy.ImportAsync(project, appConfiguration, authInfo, runnerLogger);
+            var result = await strategy.ImportAsync(project, appConfiguration, authInfo, runnerLogger, commitId);
 
             return result;
         }

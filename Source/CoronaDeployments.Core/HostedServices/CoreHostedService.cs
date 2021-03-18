@@ -37,8 +37,6 @@ namespace CoronaDeployments.Core.HostedServices
             Log.Information($"{nameof(CoreHostedService)} is running.");
 
             timer = new Timer(DoWork, null, 0, -1); // Start immediatly without periodic signaling.
-
-            await EnsureAllProjectsAreAllocated();
         }
 
         private async Task EnsureAllProjectsAreAllocated()

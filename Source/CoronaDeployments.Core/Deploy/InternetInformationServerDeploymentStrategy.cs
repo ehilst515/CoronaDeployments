@@ -60,7 +60,7 @@ namespace CoronaDeployments.Core.Deploy
                 }
                 catch (Exception exp)
                 {
-                    Log.Error(exp, string.Empty);
+                    customLogger.Error(exp);
                     return new DeployStrategyResult(string.Empty, true);
                 }
             });
