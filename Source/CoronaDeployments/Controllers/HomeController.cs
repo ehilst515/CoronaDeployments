@@ -147,7 +147,7 @@ namespace CoronaDeployments.Controllers
 
             model.CreatedByUserId = session.User.Id;
 
-            var result = await projectRepo.CreateBuildTarget(model);
+            var (result, buildTargetId) = await projectRepo.CreateBuildTarget(model);
             if (result == false)
             {
                 this.AlertError("Could not persist this object.");
@@ -155,6 +155,40 @@ namespace CoronaDeployments.Controllers
                 return View(model);
             }
 
+            if (model.DeploymentType == Core.Deploy.DeployTargetType.IIS)
+            {
+                return RedirectToAction(nameof(CreateIISBuildTargetConfiguration), new { projectId = model.ProjectId, buildTargetId = buildTargetId });
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult CreateIISBuildTargetConfiguration([FromQuery] Guid projectId, [FromQuery] Guid buildTargetId)
+        {
+            return View(new IISBuildTargetConfigurationCreateModel { ProjectId = projectId, BuildTargetId = buildTargetId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateIISBuildTargetConfiguration([FromForm] IISBuildTargetConfigurationCreateModel model)
+        {
+            var session = await HttpContext.GetSession();
+            if (session == null)
+            {
+                return BadRequest();
+            }
+
+            model.CreatedByUserId = session.User.Id;
+
+            var result = await projectRepo.CreateIISDeployInfo(model);
+            if (result == false)
+            {
+                this.AlertError("Could not persist this object.");
+                return View(model);
+            }
+
+            this.AlertSuccess("Operation is successful.");
             return RedirectToAction(nameof(Index));
         }
 

@@ -56,6 +56,15 @@ namespace CoronaDeployments.Core.Models
         public string Log { get; set; }
     }
 
+    public class IISDeployInfo
+    {
+        public Guid Id { get; set; }
+        public Guid ProjectId { get; set; }
+        public Guid BuildTargetId { get; set; }
+        public IISDeployTargetExtraInfo Info { get; set; }
+        public Guid CreatedByUserId { get; set; }
+    }
+
     public class BuildAndDeployRequestModel
     {
         public BuildAndDeployRequest Request { get; set; }

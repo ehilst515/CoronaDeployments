@@ -1,7 +1,20 @@
 ﻿namespace CoronaDeployments.Core.Deploy
 {
-    public record IISDeployTargetExtraInfo(string SiteName, int Port) : IDeployTargetExtraInfo
+    public class IISDeployTargetExtraInfo : IDeployTargetExtraInfo
     {
+        public string SiteName { get; set; }
+        public int Port { get; set; }
+
+        public IISDeployTargetExtraInfo()
+        {
+        }
+
+        public IISDeployTargetExtraInfo(string siteName, int port)
+        {
+            SiteName = siteName;
+            Port = port;
+        }
+
         public static bool Validate(IISDeployTargetExtraInfo i)
         {
             if (i == default) return false;

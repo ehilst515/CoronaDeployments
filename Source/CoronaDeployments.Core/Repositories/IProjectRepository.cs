@@ -13,7 +13,7 @@ namespace CoronaDeployments.Core.Repositories
     {
         public Task<bool> Create(ProjectCreateModel model);
 
-        public Task<bool> CreateBuildTarget(BuildTargetCreateModel model);
+        public Task<(bool, Guid)> CreateBuildTarget(BuildTargetCreateModel model);
 
         public Task<IReadOnlyList<Project>> GetAll();
 
@@ -28,6 +28,8 @@ namespace CoronaDeployments.Core.Repositories
         public Task<List<BuildAndDeployRequestModel>> GetBuildAndDeployRequests(Guid projectId, BuildAndDeployRequestState? state, bool includeProject = false);
 
         public Task UpdateBuildAndDeployRequest(Guid id, string log, BuildAndDeployRequestState? newState, DateTime? startedAt);
+
+        public Task<bool> CreateIISDeployInfo(IISBuildTargetConfigurationCreateModel m);
     }
 
     public class ProjectRepository : IProjectRepository
@@ -61,7 +63,7 @@ namespace CoronaDeployments.Core.Repositories
             }
         }
 
-        public async Task<bool> CreateBuildTarget(BuildTargetCreateModel model)
+        public async Task<(bool, Guid)> CreateBuildTarget(BuildTargetCreateModel model)
         {
             using (var session = _store.OpenSession())
             {
@@ -73,12 +75,12 @@ namespace CoronaDeployments.Core.Repositories
 
                     await session.SaveChangesAsync();
 
-                    return true;
+                    return (true, e.Id);
                 }
                 catch (Exception exp)
                 {
                     Log.Error(exp, string.Empty);
-                    return false;
+                    return (false, Guid.Empty);
                 }
             }
         }
@@ -221,6 +223,18 @@ namespace CoronaDeployments.Core.Repositories
                         project.BuildTargets = await session.Query<BuildTarget>()
                             .Where(x => x.ProjectId == projectId)
                             .ToListAsync();
+
+                        foreach (var bt in project.BuildTargets)
+                        {
+                            if (bt.DeploymentType == Deploy.DeployTargetType.IIS)
+                            {
+                                var info = await session.Query<IISDeployInfo>()
+                                    .Where(x => x.BuildTargetId == bt.Id)
+                                    .FirstOrDefaultAsync();
+
+                                bt.DeploymentExtraInfo = info?.Info;
+                            }
+                        }
                     }
 
                     var result = requests
@@ -324,6 +338,28 @@ namespace CoronaDeployments.Core.Repositories
             }
         }
 
+        public async Task<bool> CreateIISDeployInfo(IISBuildTargetConfigurationCreateModel m)
+        {
+            using (var session = _store.OpenSession())
+            {
+                try
+                {
+                    var e = ToEntity(m);
+
+                    session.Store(e);
+
+                    await session.SaveChangesAsync();
+
+                    return true;
+                }
+                catch (Exception exp)
+                {
+                    Log.Error(exp, string.Empty);
+                    return false;
+                }
+            }
+        }
+
         public Project ToEntity(ProjectCreateModel m)
         {
             return new Project
@@ -359,6 +395,17 @@ namespace CoronaDeployments.Core.Repositories
                 CreatedAtUtc = DateTime.UtcNow,
                 Info = m.Selected,
                 Name = m.Name,
+                CreatedByUserId = m.CreatedByUserId,
+            };
+        }
+
+        public IISDeployInfo ToEntity(IISBuildTargetConfigurationCreateModel m)
+        {
+            return new IISDeployInfo
+            {
+                ProjectId = m.ProjectId,
+                BuildTargetId = m.BuildTargetId,
+                Info = m.Configuration,
                 CreatedByUserId = m.CreatedByUserId,
             };
         }
